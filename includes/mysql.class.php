@@ -1,9 +1,9 @@
 <?php 
 class DBCON {
-var $dbname = "scrum_db";
-var $dbusername = "scrum_usr";
-var $dbpassword = "Fjkb9X1iR";
-var $dbserver = "localhost";
+var $dbname = "";
+var $dbusername = "";
+var $dbpassword = "";
+var $dbserver = "";
 
 var $conn_id;
 var $sql_query;
