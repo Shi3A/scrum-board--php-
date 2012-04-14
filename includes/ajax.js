@@ -29,17 +29,20 @@ $(document).ready(function() {
     
     $(".new_task").change(function() {
 	$(this).attr("readonly","readonly");
-        var main_id = $(this).attr("id");
+	var main_id = $(this).attr("id")
+        var columnid = $(this).parent().parent('.columns').attr("id");
+        
         var text = $(this).val();
+//        alert(main_id);
 	
 	$.ajax({
     	    type: "POST",
     	    url: "/includes/newtask.php",
-    	    data: { task_text:  text, cid: main_id },
+    	    data: { task_text:  text, cid: columnid },
             success: (function(){
 	     $.post(
 	        "/includes/column.php",
-	        {cid: main_id},
+	        {cid: columnid},
 	        function(data) {
 	    	    $('#'+main_id).parent().siblings(".tasks").html('');
 	    	    $('#'+main_id).parent().siblings(".tasks").html(data);
@@ -66,7 +69,7 @@ $(document).ready(function() {
 	    var title = $('#'+parentid + " .task_title").text();
 	     $.post(
 	        "/includes/edittask.php",
-	        { title: title, tid : parentid }
+	        { action: 'edit', title: title, tid : parentid }
 	     );
 
 		$('#'+parentid + " .task_title").attr('contenteditable', 'false');
@@ -78,10 +81,31 @@ $(document).ready(function() {
 		var content = $('#'+parentid + " .task_content").html();
 		$.post(
 	    	    "/includes/edittask.php",
-	    	    { content: content, tid : parentid }
+	    	    { action: 'edit', content: content, tid : parentid }
 	        );
 		$('#'+parentid + " .task_content").attr('contenteditable', 'false');
 	    });
+    });
+    $(".task_close").live("click", function(){
+	var parentid = $(this).parent().parent('.task').attr("id");
+	var columnid = $(this).parent().parent().parent().parent().attr("id");
+//	alert(columnid);
+	$.post(
+	    "/includes/edittask.php",
+	    { action: 'close', tid : parentid },
+	    ( function(){
+		 $.post(
+	        "/includes/column.php",
+	        {cid: columnid},
+	        function(data) {
+	    	    $('#'+columnid).children(".tasks").html('');
+	    	    $('#'+columnid).children(".tasks").html(data);
+	        }
+	        );
+
+	    })
+	);
+
     });
 });
 

@@ -3,7 +3,7 @@
 include_once('mysql.class.php');
 $task_text = htmlspecialchars($_POST['task_text'], ENT_QUOTES, 'UTF-8');
 
-if (substr($_POST['cid'], 0, 7) == 'newtask' ) $cid = substr(htmlspecialchars($_POST['cid'], ENT_QUOTES, 'UTF-8'), 8);
+if (substr($_POST['cid'], 0, 6) == 'column' ) $cid = substr(htmlspecialchars($_POST['cid'], ENT_QUOTES, 'UTF-8'), 7);
 else $cid = 'false';
 
 $title = $comment='';
