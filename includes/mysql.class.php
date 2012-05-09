@@ -96,13 +96,13 @@ var $comment;
     return $this->output;
   }
   
-  function makeTree($project_title) {
+  function makeTree($project_id) {
     $this->sql_query="SELECT columns.cid,column_name 
 	FROM columns 
 	JOIN projects_columns WHERE pid = (
 	SELECT pid
 	FROM projects
-	WHERE title = '$project_title'
+	WHERE pid = '$project_id'
 	LIMIT 1 )
 	AND columns.cid = projects_columns.cid";
     $this->sql_rets = parent::sql_execute($this->sql_query);

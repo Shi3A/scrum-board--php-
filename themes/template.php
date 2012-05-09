@@ -5,13 +5,16 @@
     <link type="text/css" rel="stylesheet" media="all" href="/css/style.css" />
     <!-- <?php // <script src="/includes/jquery.js"></script> ?> -->
     <script src="http://ajax.googleapis.com/ajax/libs/jquery/1.4.4/jquery.min.js"></script>
+    <script src="http://yandex.st/jquery/cookie/1.0/jquery.cookie.min.js"></script>
     <script src="/includes/ajax.js"></script>
     <script src="/includes/autoresize.jquery.js"></script>
 </head>
 <body>
 
 <div id="wrap">
+    <!-- content -->
     [content]
+    <!-- /content -->
     <div class="clear"></div>
 </div> <!-- /#wrap -->
 </body>
