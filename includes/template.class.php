@@ -8,7 +8,7 @@
  */
 include_once('mysql.class.php');
 
-$_SERVER['HTTP_HOST'] = 'localhost';
+//$_SERVER['HTTP_HOST'] = 'localhost';
 define("PATH","http://".$_SERVER['HTTP_HOST']."/themes/");
 
 class template extends make_tree
