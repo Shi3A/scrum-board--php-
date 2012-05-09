@@ -1,28 +1,32 @@
 <?php 
 class DBCON {
-var $dbname = "";
-var $dbusername = "";
-var $dbpassword = "";
-var $dbserver = "";
+var $dbname = "scrum_db";
+var $dbusername = "scrum_usr";
+var $dbpassword = "scrumpass";
+var $dbserver = "localhost";
 
 var $conn_id;
 var $sql_query;
 var $sql_err;
 var $sql_res;
 
+var $SQLCHARSET = 'utf8';
+
  function connect()
   {
-    $this->conn_id = mysql_connect($this->dbserver, $this->dbusername, $this->dbpassword) or die('No connection to MySQL');
-    mysql_select_db($this->dbname) or die('Can\'t select database');
-    mysql_query("SET NAMES utf8");
+    $this->conn_id = new PDO ( 'mysql:host=' . $this->dbserver . ';dbname=' . $this->dbname, $this->dbusername, $this->dbpassword ) or die ('No connection to db-server');  
+    $this->conn_id->query ( 'SET character_set_connection = ' . $this->SQLCHARSET . ';' );  
+    $this->conn_id->query ( 'SET character_set_client = ' . $this->SQLCHARSET . ';' );  
+    $this->conn_id->query ( 'SET character_set_results = ' . $this->SQLCHARSET . ';' );  
+
   }
 
  function sql_execute($sql_query)
   {
     $this->connect();
-    $this->sql_res=mysql_query($sql_query,$this->conn_id);
-    $this->sql_err=mysql_error();
-    $this->sql_close();
+    $result = $this->conn_id->prepare($sql_query);
+    $result->execute ();
+    $this->sql_res = $result->fetchAll ();  
 
     return $this->sql_res;
   }
@@ -51,13 +55,18 @@ var $title;
 var $comment;
 
   function getProject($project_title) {
-    $this->sql_query="SELECT pid FROM projects WHERE title = '$project_title'" or die('Wrong query!');
+    $this->sql_query="SELECT pid FROM projects WHERE title = '$project_title'";
     parent::sql_execute($this->sql_query);
 
-    while ($row = mysql_fetch_array($this->sql_res)) {
+/*    while ($row = mysql_fetch_array($this->sql_res)) {
         $this->sql_ret = $row['pid'];
     }
-    mysql_free_result($this->sql_res);
+*/
+    foreach ($this->sql_res as $row){  
+	//любые действия например  
+	$this->sql_ret = $row['pid'];
+    }  
+//    mysql_free_result($this->sql_res);
     return $this->sql_ret;
   }
 
@@ -66,7 +75,10 @@ var $comment;
 	FROM tasks 	
 	WHERE cid = '$cid' AND status = '0' ";
     parent::sql_execute($this->sql_query);
-       while ($row = mysql_fetch_array($this->sql_res)) {
+
+    foreach ($this->sql_res as $row){  
+	//любые действия например  
+//       while ($row = mysql_fetch_array($this->sql_res)) {
 	  if (isset($row['title'])) {
 	    $this->output .= '<div class="task" id="task' . $row['tid'] . '">';
 	    $this->output .= '<div class="task_title">' . $row['title'] . '</div>';
@@ -80,7 +92,7 @@ var $comment;
 
        }
      
-    mysql_free_result($this->sql_res);
+//    mysql_free_result($this->sql_res);
     return $this->output;
   }
   
@@ -95,7 +107,8 @@ var $comment;
 	AND columns.cid = projects_columns.cid";
     $this->sql_rets = parent::sql_execute($this->sql_query);
 
-   while ($row = mysql_fetch_array($this->sql_rets)) {
+//   while ($row = mysql_fetch_array($this->sql_rets)) {
+    foreach ($this->sql_rets as $row){ 
 	$this->output .= '<div class="columns" id="column_' . $row['cid'] . '"><div class="title">' . $row['column_name'] . '</div>';
 	$this->output .= '<div class="tasks">';
 	$this->getTask($row['cid']);
@@ -106,7 +119,7 @@ var $comment;
 
     }
 
-    mysql_free_result($this->sql_rets);
+//    mysql_free_result($this->sql_rets);
     
     return $this->output;
   }
