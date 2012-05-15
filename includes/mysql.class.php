@@ -9,6 +9,7 @@ var $conn_id;
 var $sql_query;
 var $sql_err;
 var $sql_res;
+var $sql_row;
 
 var $SQLCHARSET = 'utf8';
 
@@ -26,7 +27,8 @@ var $SQLCHARSET = 'utf8';
     $this->connect();
     $result = $this->conn_id->prepare($sql_query);
     $result->execute ();
-    $this->sql_res = $result->fetchAll ();  
+    $this->sql_res = $result->fetchAll();
+    $this->sql_row = $result->rowCount();
 
     return $this->sql_res;
   }
@@ -55,18 +57,16 @@ var $title;
 var $comment;
 
   function getProject($project_title) {
-    $this->sql_query="SELECT pid FROM projects WHERE title = '$project_title'";
+    $this->sql_query="SELECT pid
+    FROM projects
+    WHERE title = '$project_title'";
+
     parent::sql_execute($this->sql_query);
 
-/*    while ($row = mysql_fetch_array($this->sql_res)) {
-        $this->sql_ret = $row['pid'];
-    }
-*/
     foreach ($this->sql_res as $row){  
-	//любые действия например  
-	$this->sql_ret = $row['pid'];
+	    $this->sql_ret = $row['pid'];
     }  
-//    mysql_free_result($this->sql_res);
+
     return $this->sql_ret;
   }
 
@@ -97,18 +97,14 @@ var $comment;
   }
   
   function makeTree($project_id) {
-    $this->sql_query="SELECT columns.cid,column_name 
+    $this->output = '';
+    $this->sql_query="SELECT cid,column_name
 	FROM columns 
-	JOIN projects_columns WHERE pid = (
-	SELECT pid
-	FROM projects
-	WHERE pid = '$project_id'
-	LIMIT 1 )
-	AND columns.cid = projects_columns.cid";
+	WHERE pid = '$project_id'";
     $this->sql_rets = parent::sql_execute($this->sql_query);
 
-//   while ($row = mysql_fetch_array($this->sql_rets)) {
-    foreach ($this->sql_rets as $row){ 
+    $this->output = '<div class="project_link"><a href="/index.php" title="Ко всем проектам">Ко всем проектам</a> </div>';
+    foreach ($this->sql_rets as $row){
 	$this->output .= '<div class="columns" id="column_' . $row['cid'] . '"><div class="title">' . $row['column_name'] . '</div>';
 	$this->output .= '<div class="tasks">';
 	$this->getTask($row['cid']);
@@ -119,9 +115,32 @@ var $comment;
 
     }
 
-//    mysql_free_result($this->sql_rets);
-    
     return $this->output;
+  }
+
+  function projectUidSet($uid,$mode) {
+
+      $serialized_value = serialize($mode);
+      $this->sql_query = "UPDATE projects_access SET mode = '$serialized_value' WHERE uid = '$uid'";
+      parent::sql_execute($this->sql_query);
+      $sql1 = $this->sql_row;
+      $query2 = "SELECT mode FROM projects_access WHERE uid = '$uid'";
+      parent::sql_execute($query2);
+      $sql2 = $this->sql_row;
+      if (!$sql1 && !$sql2) {
+          $this->sql_query = "INSERT INTO projects_access (uid, mode) VALUES ('$uid', '$serialized_value')";
+          parent::sql_execute($this->sql_query);
+      }
+
+  }
+  function projectUidGet($uid) {
+      $this->sql_query = "SELECT mode FROM projects_access WHERE uid='$uid' LIMIT 1";
+      parent::sql_execute($this->sql_query);
+      foreach($this->sql_res as $row) {
+          $output = unserialize($row['mode']);
+      }
+
+      return $output;
   }
   
 }
