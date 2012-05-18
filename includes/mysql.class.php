@@ -57,6 +57,7 @@ var $title;
 var $comment;
 
   function getProject($project_title) {
+    $sql_ret = '';
     $this->sql_query="SELECT pid
     FROM projects
     WHERE title = '$project_title'";
@@ -64,10 +65,10 @@ var $comment;
     parent::sql_execute($this->sql_query);
 
     foreach ($this->sql_res as $row){  
-	    $this->sql_ret = $row['pid'];
-    }  
+	    $sql_ret = $row['pid'];
+    }
 
-    return $this->sql_ret;
+    return $sql_ret;
   }
 
   function getTask($cid) {
@@ -97,25 +98,36 @@ var $comment;
   }
   
   function makeTree($project_id) {
-    $this->output = '';
-    $this->sql_query="SELECT cid,column_name
-	FROM columns 
-	WHERE pid = '$project_id'";
-    $this->sql_rets = parent::sql_execute($this->sql_query);
+    if(empty($_SESSION['projects'])) exit;
+    if(!empty($_SESSION['projects'])) {
+        $this->output = '';
+        $this->output = '<div class="project_link"><a href="/index.php" title="Ко всем проектам">Ко всем проектам</a> </div>';
+        foreach($_SESSION['projects'] as $key => $value) {
+            if ($project_id == $key) {
 
-    $this->output = '<div class="project_link"><a href="/index.php" title="Ко всем проектам">Ко всем проектам</a> </div>';
-    foreach ($this->sql_rets as $row){
-	$this->output .= '<div class="columns" id="column_' . $row['cid'] . '"><div class="title">' . $row['column_name'] . '</div>';
-	$this->output .= '<div class="tasks">';
-	$this->getTask($row['cid']);
-	$this->output .= '</div>';
-	$this->output .= '<div class="newtextarea"><textarea class="new_task" id="newtask_' . $row['cid'] . '" readonly="readonly" >Новая задача</textarea></div>';
-	$this->output .= '</div>';
+                $this->sql_query="SELECT cid,column_name
+                FROM columns
+                WHERE pid = '$project_id'";
+                $this->sql_rets = parent::sql_execute($this->sql_query);
+
+                foreach ($this->sql_rets as $row){
+                $this->output .= '<div class="columns" id="column_' . $row['cid'] . '"><div class="title">' . $row['column_name'] . '</div>';
+                $this->output .= '<div class="tasks">';
+                $this->getTask($row['cid']);
+                $this->output .= '</div>';
+                $this->output .= '<div class="newtextarea"><textarea class="new_task" id="newtask_' . $row['cid'] . '" readonly="readonly" >Новая задача</textarea></div>';
+                $this->output .= '</div>';
+                }
+            }
+            else $this->output .= 'Permission Denied';
+
+        }
 
 
+        return $this->output;
     }
 
-    return $this->output;
+    return false;
   }
 
   function projectUidSet($uid,$mode) {
@@ -134,11 +146,14 @@ var $comment;
 
   }
   function projectUidGet($uid) {
+      $output = '';
       $this->sql_query = "SELECT mode FROM projects_access WHERE uid='$uid' LIMIT 1";
       parent::sql_execute($this->sql_query);
       foreach($this->sql_res as $row) {
           $output = unserialize($row['mode']);
       }
+
+      $_SESSION['projects'] = $output;
 
       return $output;
   }

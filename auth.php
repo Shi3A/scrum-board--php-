@@ -9,7 +9,7 @@
 include_once('./includes/auth.class.php');
 
 $authorization = new auth();
-if (is_numeric($_GET['logout']) && $_GET['logout'] == 1) {
+if (isset($_GET['logout']) && is_numeric($_GET['logout']) && $_GET['logout'] == 1) {
     unset($_SESSION['uid']);
     header("Location: http://" . $_SERVER['HTTP_HOST'] );
 }
